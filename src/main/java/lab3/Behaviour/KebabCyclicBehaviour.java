@@ -3,6 +3,7 @@ package lab3.Behaviour;
 import jade.core.AID;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.lang.acl.ACLMessage;
+import jade.lang.acl.MessageTemplate;
 import lab3.KebabAgent;
 
 @SuppressWarnings("serial")
@@ -19,7 +20,7 @@ public class KebabCyclicBehaviour extends CyclicBehaviour
 	@Override
 	public void action() 
 	{
-		ACLMessage aclMessage = agent.receive();
+		ACLMessage aclMessage = agent.receive(MessageTemplate.MatchPerformative(ACLMessage.REQUEST));
 		
 		if(aclMessage != null)
 		{
@@ -44,7 +45,6 @@ public class KebabCyclicBehaviour extends CyclicBehaviour
 			}
 			else
 			{
-				//kebabs = Integer.parseInt(aclMessage.getContent());
 				System.out.println("Table fill with " + agent.getKebabs() + "kebabs.");
 				agent.SendMessageToAgents("START", "philosopher");
 				agent.SendMessageToAgents("START", "fork");

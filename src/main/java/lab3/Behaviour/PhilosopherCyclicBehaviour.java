@@ -21,6 +21,7 @@ public class PhilosopherCyclicBehaviour extends CyclicBehaviour
 	@Override
 	public void action() 
 	{
+		agent.Start();
 		ACLMessage aclMessage = agent.receive();
 		if(aclMessage != null)
 		{
@@ -28,7 +29,7 @@ public class PhilosopherCyclicBehaviour extends CyclicBehaviour
 			
 			if(message.equals("START"))
 			{
-				agent.Start();
+				agent.Start();				
 			}
 			else if(message.equals("PleaseHereYourKebabing"))
 			{

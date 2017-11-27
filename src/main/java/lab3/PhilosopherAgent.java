@@ -4,8 +4,8 @@ import java.util.Random;
 
 import jade.core.AID;
 import jade.core.Agent;
-import jade.core.behaviours.TickerBehaviour;
 import jade.lang.acl.ACLMessage;
+import lab3.Behaviour.CreateTickerBehaviour;
 import lab3.Behaviour.PhilosopherCyclicBehaviour;
 import lab3.Helpers.DFServiceHelper;
 
@@ -25,38 +25,27 @@ public class PhilosopherAgent extends Agent
 	private Boolean rightForkPickUp = false;
 	private Boolean rightForkResponse = false;
 	
+	@Override
 	protected void setup() 
 	{
-		reactionTime = new Random().nextInt(max - min + 1) + min;
-		
 		DFServiceHelper.Register(this, "philosopher", "JADE-philosopher");
-				
+		
+		setReactionTime(new Random().nextInt(max - min + 1) + min);
+	
+        System.out.println(this.getLocalName() + " register with " + getReactionTime() + " reaction time.");
+        
 		addBehaviour(new PhilosopherCyclicBehaviour(this));
 	}
 	
 	public void Start()
 	{
-		addBehaviour(new TickerBehaviour(this, getReactionTime()) 
-		{			
-			@Override
-			protected void onTick() 
-			{
-				ACLMessage aclMessage = new ACLMessage(ACLMessage.REQUEST);
-				aclMessage.setContent("PickUp");
-				aclMessage.addReceiver(getTmpRightFork());
-				send(aclMessage);
-				
-				aclMessage.removeReceiver(getTmpRightFork());
-				aclMessage.addReceiver(getTmpLeftFork());
-				send(aclMessage);
-			}
-		});
+		addBehaviour(new CreateTickerBehaviour(this, getReactionTime()));
 	}
 	
 	public void PutForks()	
 	{
 		ACLMessage aclMessage = new ACLMessage(ACLMessage.REQUEST);
-		
+
 		aclMessage.setContent("PutDown");
 		aclMessage.addReceiver(getTmpLeftFork());
 		aclMessage.addReceiver(getTmpRightFork());

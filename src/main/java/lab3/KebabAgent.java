@@ -14,12 +14,12 @@ public class KebabAgent extends Agent
 {
 	private int kebabs = 250;
 	
+	@Override
 	protected void setup() 
 	{	
 		DFServiceHelper.Register(this, "kebab", "JADE-kebab");
-		
-		doWait(2000);
-		
+        System.out.println(this.getLocalName() + " register.");
+        		
 		addBehaviour(new KebabCyclicBehaviour(this));		
 	}
 		

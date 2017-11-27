@@ -3,6 +3,7 @@ package lab3.Behaviour;
 import jade.core.AID;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.lang.acl.ACLMessage;
+import jade.lang.acl.MessageTemplate;
 import lab3.ForkAgent;
 
 @SuppressWarnings("serial")
@@ -18,7 +19,7 @@ public class ForkCyclicBehaviour extends CyclicBehaviour
 	@Override
 	public void action() 
 	{
-		ACLMessage aclMessage = agent.receive();
+		ACLMessage aclMessage = agent.receive(MessageTemplate.MatchPerformative(ACLMessage.REQUEST));
 		if(aclMessage != null)
 		{
 			AID sender = aclMessage.getSender();
@@ -27,6 +28,7 @@ public class ForkCyclicBehaviour extends CyclicBehaviour
 			if(message.equals("PickUp"))
 			{
 				ACLMessage aclMessage2 = new ACLMessage(ACLMessage.INFORM);
+				//aclMessage2.setPerformative(ACLMessage.INFORM);
 				aclMessage2.addReceiver(sender);
 				
 				if(agent.getForkPick() == false)
@@ -47,10 +49,10 @@ public class ForkCyclicBehaviour extends CyclicBehaviour
 					agent.setForkPick(false);
 				}
 			}
-//			else if(message.equals("EMPTY"))
-//			{
-//				doDelete();
-//			}
+			else if(message.equals("EMPTY"))
+			{
+				agent.doDelete();
+			}
 		}
 		else
 		{

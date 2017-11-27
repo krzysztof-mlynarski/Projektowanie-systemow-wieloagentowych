@@ -9,10 +9,12 @@ public class ForkAgent extends Agent
 {
 	private Boolean forkPick = false;
 	
+	@Override
 	protected void setup()
 	{		
 		DFServiceHelper.Register(this, "fork", "JADE-fork");
-		
+        System.out.println(this.getLocalName() + " register.");
+        
 		addBehaviour(new ForkCyclicBehaviour(this));
 	}
 

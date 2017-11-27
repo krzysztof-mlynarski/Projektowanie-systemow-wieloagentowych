@@ -21,7 +21,6 @@ public class DFServiceHelper
         try
         {
             DFService.register(agent, dfAgentDescription);
-            System.out.println(agent.getLocalName() + " register.");
         } 
         catch (FIPAException fe) 
         {
