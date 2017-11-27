@@ -3,8 +3,6 @@ package lab1;
 import java.util.Random;
 
 import jade.core.Agent;
-import jade.domain.DFService;
-import jade.domain.FIPAException;
 
 @SuppressWarnings("serial")
 public class ConsumerAgent extends Agent
@@ -23,15 +21,6 @@ public class ConsumerAgent extends Agent
 		System.out.println("-----------------" + this.getLocalName() + "-----------------");
 		System.out.println(this.getLocalName() + " used " + getTokensCount() + " tokens.");
 		System.out.println("-------------------------------------------");
-		
-		try 
-		{
-			DFService.deregister(this);
-		}
-		catch (FIPAException fe)
-		{
-			fe.printStackTrace();
-		}
 	}
 	
 	public int getTokensCount() 

@@ -4,13 +4,9 @@ import java.util.Random;
 
 import jade.core.AID;
 import jade.core.Agent;
-import jade.core.behaviours.CyclicBehaviour;
 import jade.core.behaviours.TickerBehaviour;
-import jade.domain.DFService;
-import jade.domain.FIPAException;
-import jade.domain.FIPAAgentManagement.DFAgentDescription;
-import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
+import lab3.Behaviour.PhilosopherCyclicBehaviour;
 import lab3.Helpers.DFServiceHelper;
 
 @SuppressWarnings("serial")
@@ -35,148 +31,112 @@ public class PhilosopherAgent extends Agent
 		
 		DFServiceHelper.Register(this, "philosopher", "JADE-philosopher");
 				
-		addBehaviour(new CyclicBehaviour() 
-		{		
-			@Override
-			public void action() 
-			{
-				ACLMessage aclMessage = receive();
-				if(aclMessage != null)
-				{
-					String message = aclMessage.getContent();
-					
-					if(message.equals("START"))
-					{
-						Start();
-					}
-					else if(message.equals("PleaseHereYourKebabing"))
-					{
-						eatenKebabs++;
-						System.out.println(getLocalName() + "will now eat kebabing. ek " + eatenKebabs);
-					}
-					else if(message.equals("PickedPositive"))
-					{
-						if(aclMessage.getSender().getLocalName().equals(tmpLeftFork.getLocalName()))
-						{
-							leftForkPickUp = true;
-							leftForkResponse = true;
-						}
-						if(aclMessage.getSender().getLocalName().equals(tmpRightFork.getLocalName()))
-						{
-							rightForkPickUp = true;
-							rightForkResponse = true;
-						}
-					}
-					else if(message.equals("PickedNegative"))
-					{
-						if(aclMessage.getSender().getLocalName().equals(tmpLeftFork.getLocalName()))
-						{
-							leftForkPickUp = false;
-							leftForkResponse = true;
-						}
-						if(aclMessage.getSender().getLocalName().equals(tmpRightFork.getLocalName()))
-						{
-							rightForkPickUp = false;
-							rightForkResponse = true;
-						}
-					}
-					else if(message.equals("EMPTY"))
-					{
-						doDelete();
-					}
-					
-					myAgent.doWait(reactionTime);
-					
-					if(leftForkResponse && rightForkResponse)
-					{
-						if(!leftForkPickUp || !rightForkPickUp)
-						{
-							System.out.println(getLocalName() + " requesting to put down both forks.");
-							PutForks();
-						}
-						else if (leftForkPickUp && rightForkPickUp)
-						{
-							System.out.println(getLocalName() + " has both positive forks. Trying to pick kebabs.");
-							ACLMessage aclMessage2 = new ACLMessage(ACLMessage.REQUEST);
-							aclMessage2.setContent("TakeKebabs");
-							
-							ServiceDescription serviceDescription = new ServiceDescription();
-							serviceDescription.setType("philosopher");
-							DFAgentDescription dfAgentDescription = new DFAgentDescription();
-							dfAgentDescription.addServices(serviceDescription);
-							
-							try 
-							{
-								DFAgentDescription[] result = DFService.search(myAgent, dfAgentDescription);
-								if(result.length == 0)
-								{
-									doDelete();
-								}
-								else
-								{
-									for (int i = 0; i < result.length; ++i) 
-									{
-										aclMessage.addReceiver(result[i].getName());
-										send(aclMessage);
-									}	
-								}							
-							} 
-							catch (FIPAException e) 
-							{
-								e.printStackTrace();
-							}
-							
-							PutForks();
-						}
-					}
-				}
-				else
-				{
-					block();
-				}
-			}
-		});
+		addBehaviour(new PhilosopherCyclicBehaviour(this));
 	}
 	
-	private void Start()
+	public void Start()
 	{
-		addBehaviour(new TickerBehaviour(this, reactionTime) 
+		addBehaviour(new TickerBehaviour(this, getReactionTime()) 
 		{			
 			@Override
 			protected void onTick() 
 			{
 				ACLMessage aclMessage = new ACLMessage(ACLMessage.REQUEST);
 				aclMessage.setContent("PickUp");
-				aclMessage.addReceiver(tmpRightFork);
+				aclMessage.addReceiver(getTmpRightFork());
 				send(aclMessage);
 				
-				aclMessage.removeReceiver(tmpRightFork);
-				aclMessage.addReceiver(tmpLeftFork);
+				aclMessage.removeReceiver(getTmpRightFork());
+				aclMessage.addReceiver(getTmpLeftFork());
 				send(aclMessage);
 			}
 		});
 	}
 	
-	private void PutForks()
+	public void PutForks()	
 	{
 		ACLMessage aclMessage = new ACLMessage(ACLMessage.REQUEST);
 		
 		aclMessage.setContent("PutDown");
-		aclMessage.addReceiver(tmpLeftFork);
-		aclMessage.addReceiver(tmpRightFork);
+		aclMessage.addReceiver(getTmpLeftFork());
+		aclMessage.addReceiver(getTmpRightFork());
 		
 		send(aclMessage);
 		
-		leftForkResponse = false;
-		leftForkPickUp = false;
-		rightForkResponse = false;
-		rightForkPickUp = false;
+		setLeftForkResponse(false);
+		setLeftForkPickUp(false);
+		setRightForkResponse(false);
+		setRightForkPickUp(false);
 	}
 	
 	protected void takeDown()
 	{
 		System.out.println("-----------------" + this.getLocalName() + "-----------------");
-		System.out.println(this.getLocalName() + " eaten kebabs: " + eatenKebabs);
+		System.out.println(this.getLocalName() + " eaten kebabs: " + getEatenKebabs());
 		System.out.println("-------------------------------------------");
+	}
+
+	public AID getTmpLeftFork() {
+		return tmpLeftFork;
+	}
+
+	public void setTmpLeftFork(AID tmpLeftFork) {
+		this.tmpLeftFork = tmpLeftFork;
+	}
+
+	public AID getTmpRightFork() {
+		return tmpRightFork;
+	}
+
+	public void setTmpRightFork(AID tmpRightFork) {
+		this.tmpRightFork = tmpRightFork;
+	}
+
+	public int getEatenKebabs() {
+		return eatenKebabs;
+	}
+
+	public void setEatenKebabs(int eatenKebabs) {
+		this.eatenKebabs = eatenKebabs;
+	}
+
+	public int getReactionTime() {
+		return reactionTime;
+	}
+
+	public void setReactionTime(int reactionTime) {
+		this.reactionTime = reactionTime;
+	}
+
+	public Boolean getLeftForkPickUp() {
+		return leftForkPickUp;
+	}
+
+	public void setLeftForkPickUp(Boolean leftForkPickUp) {
+		this.leftForkPickUp = leftForkPickUp;
+	}
+
+	public Boolean getLeftForkResponse() {
+		return leftForkResponse;
+	}
+
+	public void setLeftForkResponse(Boolean leftForkResponse) {
+		this.leftForkResponse = leftForkResponse;
+	}
+
+	public Boolean getRightForkPickUp() {
+		return rightForkPickUp;
+	}
+
+	public void setRightForkPickUp(Boolean rightForkPickUp) {
+		this.rightForkPickUp = rightForkPickUp;
+	}
+
+	public Boolean getRightForkResponse() {
+		return rightForkResponse;
+	}
+
+	public void setRightForkResponse(Boolean rightForkResponse) {
+		this.rightForkResponse = rightForkResponse;
 	}
 }

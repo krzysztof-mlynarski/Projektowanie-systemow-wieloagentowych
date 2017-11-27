@@ -1,13 +1,12 @@
 package lab3;
 
-import jade.core.AID;
 import jade.core.Agent;
-import jade.core.behaviours.CyclicBehaviour;
 import jade.domain.DFService;
 import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
+import lab3.Behaviour.KebabCyclicBehaviour;
 import lab3.Helpers.DFServiceHelper;
 
 @SuppressWarnings("serial")
@@ -19,49 +18,12 @@ public class KebabAgent extends Agent
 	{	
 		DFServiceHelper.Register(this, "kebab", "JADE-kebab");
 		
-		doWait(4000);
+		doWait(2000);
 		
-		addBehaviour(new CyclicBehaviour() 
-		{
-			@Override
-			public void action() 
-			{
-				ACLMessage aclMessage = receive();
-				
-				if(aclMessage != null)
-				{
-					AID sender = aclMessage.getSender();
-					ACLMessage aclMessage2 = new ACLMessage(ACLMessage.INFORM);
-					aclMessage2.addReceiver(sender);
-					
-					if(aclMessage.getContent().equals("TakeKebabs"))
-					{
-						if(kebabs == 0)
-						{
-							System.out.println("List of kebabs is empty");
-							SendMessageToAgents("EMPTY", "philosopher");
-							SendMessageToAgents("EMPTY", "fork");
-						}
-						else
-						{
-							aclMessage2.setContent("PleaseHereYourKebabing");
-							kebabs--;
-						}
-						send(aclMessage2);
-					}
-					else
-					{
-						kebabs = Integer.parseInt(aclMessage.getContent());
-						System.out.println("Table fill with " + kebabs + "kebabs.");
-						SendMessageToAgents("START", "philosopher");
-						SendMessageToAgents("START", "fork");
-					}
-				}
-			}
-		});
+		addBehaviour(new KebabCyclicBehaviour(this));		
 	}
 		
-	private void SendMessageToAgents(String message, String dfServiceType)
+	public void SendMessageToAgents(String message, String dfServiceType)
 	{	
 		ServiceDescription serviceDescription = new ServiceDescription();
 		serviceDescription.setType(dfServiceType);
@@ -90,5 +52,13 @@ public class KebabAgent extends Agent
 		{
 			e.printStackTrace();
 		}
+	}
+
+	public int getKebabs() {
+		return kebabs;
+	}
+
+	public void setKebabs(int kebabs) {
+		this.kebabs = kebabs;
 	}
 }
