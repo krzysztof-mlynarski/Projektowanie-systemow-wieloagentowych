@@ -17,6 +17,7 @@ import lab2.MatrixFragment;
 @SuppressWarnings("serial")
 public class CountingBehaviour extends CyclicBehaviour
 {
+	private CountingAgent agent;
 	private MatrixFragment matrixFragment;
 	
 	public CountingBehaviour(CountingAgent agent)
@@ -30,6 +31,7 @@ public class CountingBehaviour extends CyclicBehaviour
 		if(agent.getStatus() == 0)
 		{			
 			ServiceDescription serviceDescription = new ServiceDescription();
+			serviceDescription.setType("distributor");
 			DFAgentDescription dfAgentDescription = new DFAgentDescription();
 			dfAgentDescription.addServices(serviceDescription);
 			
