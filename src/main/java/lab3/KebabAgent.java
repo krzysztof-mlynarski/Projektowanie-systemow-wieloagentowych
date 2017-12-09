@@ -1,5 +1,9 @@
 package lab3;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import jade.core.AID;
 import jade.core.Agent;
 import jade.domain.DFService;
 import jade.domain.FIPAException;
@@ -13,20 +17,36 @@ import lab3.Helpers.DFServiceHelper;
 public class KebabAgent extends Agent
 {
 	private int kebabs = 250;
+	private static List<AID> philosophers = new ArrayList<>();
+	private static List<AID> forks = new ArrayList<>();
 	
 	@Override
 	protected void setup() 
 	{	
-		DFServiceHelper.Register(this, "kebab", "JADE-kebab");
-        System.out.println(this.getLocalName() + " register.");
+		DFServiceHelper.Register(this, "kebab", "kebab");
+		doWait(200);
+        System.out.println(this.getLocalName() + " ready!");
         		
 		addBehaviour(new KebabCyclicBehaviour(this));		
+		FindAgents();
 	}
+			
+	private void FindAgents()
+	{
+		getPhilosophersAgentIds();
+		getForksAgentIds();
 		
-	public void SendMessageToAgents(String message, String dfServiceType)
-	{	
+		if(philosophers.size() != forks.size())
+		{
+			SendMessageToAgents();
+			return;
+		}
+	}
+	
+	private void getPhilosophersAgentIds()
+	{
 		ServiceDescription serviceDescription = new ServiceDescription();
-		serviceDescription.setType(dfServiceType);
+		serviceDescription.setType("philosopher");
 		DFAgentDescription dfAgentDescription = new DFAgentDescription();
 		dfAgentDescription.addServices(serviceDescription);
 		
@@ -41,17 +61,59 @@ public class KebabAgent extends Agent
 			{
 				for (int i = 0; i < result.length; ++i) 
 				{				
-					ACLMessage aclMessage = new ACLMessage(ACLMessage.INFORM);
-					aclMessage.setContent(message);
-					aclMessage.addReceiver(result[i].getName());
-					send(aclMessage);
+					philosophers.add(result[i].getName());
 				}	
-			}	
-		}
+			}
+		} 
 		catch (FIPAException e) 
 		{
 			e.printStackTrace();
 		}
+	}
+	
+	private void getForksAgentIds()
+	{
+		ServiceDescription serviceDescription = new ServiceDescription();
+		serviceDescription.setType("fork");
+		DFAgentDescription dfAgentDescription = new DFAgentDescription();
+		dfAgentDescription.addServices(serviceDescription);
+		
+		try 
+		{
+			DFAgentDescription[] result = DFService.search(this, dfAgentDescription);
+			if(result.length == 0)
+			{
+				doDelete();
+			}
+			else
+			{
+				for (int i = 0; i < result.length; ++i) 
+				{				
+					forks.add(result[i].getName());
+				}	
+			}
+		} 
+		catch (FIPAException e) 
+		{
+			e.printStackTrace();
+		}
+	}
+	
+	public void SendMessageToAgents()
+	{
+		List<AID> agents = new ArrayList<>();
+		agents.addAll(philosophers);
+		agents.addAll(forks);
+		
+		ACLMessage aclMessage = new ACLMessage(ACLMessage.INFORM);
+		aclMessage.setContent("EMPTY");
+		
+		for(AID agent : agents)
+		{
+			aclMessage.addReceiver(agent);
+		}
+		
+		send(aclMessage);
 	}
 
 	public int getKebabs() {
@@ -60,5 +122,13 @@ public class KebabAgent extends Agent
 
 	public void setKebabs(int kebabs) {
 		this.kebabs = kebabs;
+	}
+
+	public static List<AID> getPhilosophers() {
+		return philosophers;
+	}
+
+	public static List<AID> getForks() {
+		return forks;
 	}
 }

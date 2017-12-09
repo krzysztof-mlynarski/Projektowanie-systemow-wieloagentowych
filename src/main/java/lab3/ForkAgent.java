@@ -12,8 +12,8 @@ public class ForkAgent extends Agent
 	@Override
 	protected void setup()
 	{		
-		DFServiceHelper.Register(this, "fork", "JADE-fork");
-        System.out.println(this.getLocalName() + " register.");
+		DFServiceHelper.Register(this, "fork", "fork");
+        System.out.println(this.getLocalName() + " ready!");
         
 		addBehaviour(new ForkCyclicBehaviour(this));
 	}

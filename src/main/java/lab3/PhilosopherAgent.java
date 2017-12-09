@@ -5,7 +5,7 @@ import java.util.Random;
 import jade.core.AID;
 import jade.core.Agent;
 import jade.lang.acl.ACLMessage;
-import lab3.Behaviour.CreateTickerBehaviour;
+import lab3.Behaviour.PhilosopherTickerBehaviour;
 import lab3.Behaviour.PhilosopherCyclicBehaviour;
 import lab3.Helpers.DFServiceHelper;
 
@@ -15,10 +15,11 @@ public class PhilosopherAgent extends Agent
 	private AID tmpLeftFork;
 	private AID tmpRightFork;
 	
-	private int eatenKebabs = 0;
+	private int eatenKebabs;
 	private int min = 500;
 	private int max = 1500;
 	private int reactionTime;
+	private int id;
 	
 	private Boolean leftForkPickUp = false;
 	private Boolean leftForkResponse = false;
@@ -28,18 +29,15 @@ public class PhilosopherAgent extends Agent
 	@Override
 	protected void setup() 
 	{
-		DFServiceHelper.Register(this, "philosopher", "JADE-philosopher");
-		
+		setEatenKebabs(0);
+		DFServiceHelper.Register(this, "philosopher", "philosopher");
+		id = Integer.parseInt(getLocalName().substring(11));
 		setReactionTime(new Random().nextInt(max - min + 1) + min);
 	
-        System.out.println(this.getLocalName() + " register with " + getReactionTime() + " reaction time.");
+        System.out.println(this.getLocalName() + " ready! My reaction time is " + getReactionTime() + ".");
         
 		addBehaviour(new PhilosopherCyclicBehaviour(this));
-	}
-	
-	public void Start()
-	{
-		addBehaviour(new CreateTickerBehaviour(this, getReactionTime()));
+		addBehaviour(new PhilosopherTickerBehaviour(this, this.getReactionTime()));
 	}
 	
 	public void PutForks()	
@@ -58,11 +56,10 @@ public class PhilosopherAgent extends Agent
 		setRightForkPickUp(false);
 	}
 	
+	@Override
 	protected void takeDown()
 	{
-		System.out.println("-----------------" + this.getLocalName() + "-----------------");
 		System.out.println(this.getLocalName() + " eaten kebabs: " + getEatenKebabs());
-		System.out.println("-------------------------------------------");
 	}
 
 	public AID getTmpLeftFork() {
@@ -95,6 +92,18 @@ public class PhilosopherAgent extends Agent
 
 	public void setReactionTime(int reactionTime) {
 		this.reactionTime = reactionTime;
+	}
+
+	public int getId() {
+		return id;
+	}
+
+	public void setId(int id) {
+		this.id = id;
+	}
+
+	public Boolean getIsInitialized() {
+		return getTmpLeftFork() != null && getTmpRightFork() != null;
 	}
 
 	public Boolean getLeftForkPickUp() {
